@@ -86,6 +86,15 @@ elif test == 3:
     
 
 def one_block ():
+
+# this code is not complete!! we need to test to see at
+# what power and for what duration of time makes Oiler
+# travel exactly one block, I also think it would be really
+# helpful to have another file that we use to calibrate this power
+# so we can keep time consistent, and calibrate on the day of testing
+# so we don't have fluctations due to charge left in the battery
+# and are just left guessing for what power to use
+
     BP.set_motor_power(motor_left, speed)
     BP.set_motor_power(motor_right, speed)
     time.sleep(2)
