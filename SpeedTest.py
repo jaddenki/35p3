@@ -17,6 +17,10 @@ try:
         BP.set_motor_power(LEFT, -speed)
         BP.set_motor_power(RIGHT, -speed)
         
-    except KeyboardInterrupt:
-        print("ctrl + c")
+except KeyboardInterrupt:
+    BP.reset_all()
+    sys.exit
+
+
+
 
