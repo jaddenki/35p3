@@ -26,15 +26,15 @@ Re = (11 * L)/(15 * 10**-6)
 Cd = 24 / Re
 
 # multiplied by v
-v_coefficient = 3/4 * (density_fluid / density_particle) * (Cd / d_particle)
+v_coefficient = 3/4 * (density_fluid / density_particle) * (Cd / L)
 #constants
 added_values = (g * (density_fluid - density_particle) / density_particle) - ((charge * sigma) / 12 * np.pi**2 * epsilon *
                                                                               density_particle**3)
 #multiplied by D and c(t)
-dC_coefficient = (2 * charge**2)/(12 * pi * epsilon * density_particle * d_particle**3)
+dC_coefficient = (2 * charge**2)/(12 * pi * epsilon * density_particle * L**3)
 
 #multiplied by c(t)
-c_coefficient = (charge**2 * height)/(12 * pi * epsilon * density_particle * d_particle**3)
+c_coefficient = (charge**2 * height)/(12 * pi * epsilon * density_particle * L**3)
 
 # sets initial value
 Dlast = 0
@@ -46,6 +46,8 @@ for t in range(0, 327, 1):
     v_next = v_last + (added_values + v_coefficient * v_last + dC_coefficient * (1 - (Dlast/7)) - c_coefficient * (1- (Dlast/7))) * 0.001
     Dlast = Dnext
     v_last = v_next
+
+  
     
 
 finalConcentration = round((1 - (Dnext/7)), 5)

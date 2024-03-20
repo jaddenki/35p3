@@ -21,8 +21,8 @@ try:
     desiredAngle = int(input("desired angle: "))
     theta = 0
     h = 0.001
-    
-    while True:
+    x = 0
+    while x != 1:
        
         gyro_x = gyro['x']
         gyro_y = gyro['y']
@@ -35,6 +35,7 @@ try:
             theta = theta + h*degree   
             print(f"z: {gyro_z}; y: {gyro_y} degree: {degree}")
             print(f"angle: {theta}")
+            x = 1
         else:
             BP.set_motor_power(RIGHT, 0) 
             BP.set_motor_power(LEFT, 0) 
