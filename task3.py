@@ -14,62 +14,61 @@ BP.set_sensor_type(BP.PORT_3, BP.SENSOR_TYPE.EV3_GYRO_ABS_DPS) # gyro sensor
 RIGHT = BP.PORT_A
 LEFT = BP.PORT_D
 
+# Functions =======================================================
+
 def turnRight():
     print("I turn right")
     y = 0 # has not turned yet
     first = BP.get_sensor(BP.PORT_3) # initial position
-    #print(first)
     while y != 1:
         sensorValues = BP.get_sensor(BP.PORT_3)
-        #print(sensorValues[0])
-        if (sensorValues[0]) < (84+(first[0])):
+        if (sensorValues[0]) < (87+(first[0])):
             BP.set_motor_power(RIGHT, 20)
             BP.set_motor_power(LEFT, -20)  
-            # print(first[0] - sensorValues[0])
         else:
             BP.set_motor_power(RIGHT, 0) 
             BP.set_motor_power(LEFT, 0) 
             y = 1
             time.sleep(0.025)
+    time.sleep(0.2)
             
 def turnLeft():
     print("I turn left")
     y = 0 # has not turned yet
     first = BP.get_sensor(BP.PORT_3) # initial position
-    #print(first)
     while y != 1:
         sensorValues = BP.get_sensor(BP.PORT_3)
-        #print(sensorValues[0])
-        if (sensorValues[0]) > (first[0]-84):
+        if (sensorValues[0]) > (first[0]-87):
             BP.set_motor_power(RIGHT, -20)
             BP.set_motor_power(LEFT, 20)  
-            # print(first[0] - sensorValues[0])
         else:
             BP.set_motor_power(RIGHT, 0) 
             BP.set_motor_power(LEFT, 0) 
             y = 1
             time.sleep(0.025)
+    time.sleep(0.2)
 
 def goForward():
     BP.set_motor_power(RIGHT, -30)
     BP.set_motor_power(LEFT, -30)
-    time.sleep(0.3)
+    time.sleep(1.65)
     BP.set_motor_power(RIGHT, 0)
     BP.set_motor_power(LEFT, 0)
     print("I went forward once!")
             
 # Variables ==================================================
+
 cpx = 0
 cpy = 0
 
-wpx = 3
-wpy = 1
+wpx = int(input("wpx: "))
+wpy = int(input("wpy: "))
 
-ob1x = 0
-ob1y = 3
+ob1x = int(input("ob1x: "))
+ob1y = int(input("ob1y: "))
 
-ob2x = 1
-ob2y = 3
+ob2x = int(input("ob2x: "))
+ob2y =  int(input("ob2y: "))
 
 x = 1 # true
 pos = 'right'
@@ -97,6 +96,11 @@ try:
                         pos = 'left'
                         goForward()
                         cpx -= 1
+                    elif (pos == 'right') and ((cpy + 1 != ob1y ) or (cpy + 1 != ob2y)):
+                        turnLeft()
+                        pos = 'up'
+                        goForward()
+                        cpy += 1
                     else:
                         turnLeft()
                         turnLeft()
@@ -139,6 +143,8 @@ try:
                             turnLeft()
                             pos = 'up'
                         print("im here")
+                        turnRight()
+                        pos = 'right'
                         goForward()
                         cpx += 1
                 else:

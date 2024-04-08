@@ -1,27 +1,25 @@
 from __future__ import print_function # use python 3 syntax but make it compatible with python 2
 from __future__ import division       #                           ''
 
-
 import numpy as np
 import sys
 import time     # import the time library for the sleep function
 import brickpi3 # import the BrickPi3 drivers
+import grovepi
 
-BP = brickpi3.BrickPi3() # Create an instance of the BrickPi3 class. BP will be the BrickPi3 object.
-BP.set_sensor_type(BP.PORT_3, BP.SENSOR_TYPE.EV3_GYRO_ABS_DPS)
-
+BP = brickpi3.BrickPi3() 
 RIGHT = BP.PORT_A
 LEFT = BP.PORT_D
 
 # Functions =======================================================
 
-def turnRight(turnAmt):
+def turnRight():
     print("I turn right")
     y = 0 # has not turned yet
     first = BP.get_sensor(BP.PORT_3) # initial position
     while y != 1:
         sensorValues = BP.get_sensor(BP.PORT_3)
-        if (sensorValues[0]) < (turnAmt+(first[0])):
+        if (sensorValues[0]) < (84+(first[0])):
             BP.set_motor_power(RIGHT, 20)
             BP.set_motor_power(LEFT, -20)  
         else:
@@ -29,14 +27,15 @@ def turnRight(turnAmt):
             BP.set_motor_power(LEFT, 0) 
             y = 1
             time.sleep(0.025)
+    time.sleep(0.2)
             
-def turnLeft(turnAmt):
+def turnLeft():
     print("I turn left")
     y = 0 # has not turned yet
     first = BP.get_sensor(BP.PORT_3) # initial position
     while y != 1:
         sensorValues = BP.get_sensor(BP.PORT_3)
-        if (sensorValues[0]) > (first[0]-turnAmt):
+        if (sensorValues[0]) > (first[0]-84):
             BP.set_motor_power(RIGHT, -20)
             BP.set_motor_power(LEFT, 20)  
         else:
@@ -44,27 +43,40 @@ def turnLeft(turnAmt):
             BP.set_motor_power(LEFT, 0) 
             y = 1
             time.sleep(0.025)
+    time.sleep(0.2)
 
-def goForward(amt):
-    BP.set_motor_power(RIGHT, -30)
-    BP.set_motor_power(LEFT, -30)
-    time.sleep(amt)
-    BP.set_motor_power(RIGHT, 0)
-    BP.set_motor_power(LEFT, 0)
-    print("I went forward once!")
+# set I2C to use the hardware bus
+grovepi.set_bus("RPI_1")
+BP = brickpi3.BrickPi3() 
 
-# Logic =========================================
+# Connect the Grove Ultrasonic Ranger to digital port D4
+# SIG,NC,VCC,GND
+
+front = 8
+left = 3 # left
+right = 2 # right
+
+# Variables =====================================================
+
+#ft = 5 # front threshold
+#speed = int(input("desired speed for testing: "))
+#x = 1
+
+# Logic =========================================================
 
 try:
     while True:
-        turnAmt = int(input("Amt to turn: "))
-        direction = input("r or l: ")
-        if direction == 'r':
-            turnRight(turnAmt)
-        elif direction == 'l':
-            turnLeft(turnAmt)
-        #amt = float(input("time to test: "))
-        #goForward(amt)
-except KeyboardInterrupt: # except the program gets interrupted by Ctrl+C on the keyboard.
-    BP.reset_all()        # Unconfigure the sensors, disable the motors, and restore the LED to the control of the BrickPi3 firmware.
-    sys.exit()
+        try:    
+            usf = grovepi.ultrasonicRead(front)
+            usl = grovepi.ultrasonicRead(left)
+            usr = grovepi.ultrasonicRead(right)
+            print(f"f: {usf}, l: {usl}, r: {usr}")
+            time.sleep(0.1)
+        except brickpi3.SensorError as error:
+            print(error)
+        time.sleep(0.1)
+        
+except KeyboardInterrupt:
+    print("ctrl + c")
+    BP.reset_all()
+    sys.exit
