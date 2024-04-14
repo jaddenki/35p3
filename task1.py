@@ -12,6 +12,7 @@ BP.set_sensor_type(BP.PORT_3, BP.SENSOR_TYPE.EV3_GYRO_ABS_DPS)
 
 RIGHT = BP.PORT_A
 LEFT = BP.PORT_D
+BACK = BP.PORT_B
 
 # Functions =======================================================
 
@@ -53,16 +54,32 @@ def goForward(amt):
     BP.set_motor_power(LEFT, 0)
     print("I went forward once!")
 
+def dropCargo(num):
+    BP.set_motor_power(BACK, num)
+    time.sleep(1)
+    BP.set_motor_power(BACK, 0)
+    time.sleep(1)
+    BP.set_motor_power(BACK, -num)
+    time.sleep(0.5)
+    BP.set_motor_power(BACK, 0)
+    print("I dropped a shit!")
+    
+
 # Logic =========================================
 
 try:
     while True:
-        turnAmt = int(input("Amt to turn: "))
-        direction = input("r or l: ")
-        if direction == 'r':
-            turnRight(turnAmt)
-        elif direction == 'l':
-            turnLeft(turnAmt)
+        option = input("t or c: ")
+        if option == "t":
+            turnAmt = int(input("Amt to turn: "))
+            direction = input("r or l or : ")
+            if direction == 'r':
+                turnRight(turnAmt)
+            elif direction == 'l':
+                turnLeft(turnAmt)
+        elif option == "c":
+            num = int(input("cargo speed test number: "))
+            dropCargo(num)
         #amt = float(input("time to test: "))
         #goForward(amt)
 except KeyboardInterrupt: # except the program gets interrupted by Ctrl+C on the keyboard.
