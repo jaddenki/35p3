@@ -17,6 +17,7 @@ def turnLeft():
 
 def goForward():
     print("I went forward once!")
+   # print(place)
             
 # Variables ==================================================
 
@@ -28,11 +29,20 @@ wpy = int(input("wanted point y: "))
 x = 1
 pos = input("current orientation (left, right, up, down): ")
 
+# List stuff idk ============================================
+
+# number of arrays = y position + 1 (indexing is just y)
+# items in arrays = x position
+place = [[0]] # 0 is dark
+
+
 # Logic =====================================================
 
+print(place)
 try:
     while (x == 1):
         print(f'({cpx}, {cpy})')
+        print(f'position: {pos}')
         if ((cpx == wpx) and (cpy == wpy)):
             x = 0
         else:
@@ -50,6 +60,8 @@ try:
                         pos = 'right'
                     goForward()
                     cpx += 1
+                    place[cpy].append(0)
+                    
                 elif (cpx > wpx):
                     if (pos == 'right'):
                         turnLeft()
@@ -77,6 +89,11 @@ try:
                         pos = 'up'
                     goForward()
                     cpy += 1
+                    place.append([])
+                    for i in range(0, cpx, 1):
+                        place[cpy].append(1)
+                    place[cpy].append(0)
+                        
                 elif (cpy > wpy):
                     if (pos == 'right'):
                         turnRight()
@@ -91,7 +108,7 @@ try:
                     goForward()
                     cpy -= 1
             
-                        
+    print(place)                    
 except KeyboardInterrupt:
     print("u pressed ctrl + c")
     sys.exit
