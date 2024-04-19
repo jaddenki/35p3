@@ -59,9 +59,6 @@ def dropCargo(num):
     time.sleep(1)
     BP.set_motor_power(BACK, 0)
     time.sleep(1)
-    BP.set_motor_power(BACK, -num)
-    time.sleep(0.5)
-    BP.set_motor_power(BACK, 0)
     print("I dropped a shit!")
     
 
