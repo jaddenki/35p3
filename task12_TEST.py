@@ -109,13 +109,14 @@ grovepi.pinMode(two,"INPUT")
 
 # Variables =====================================================
 
-ft = 15 # front threshold
-speed = int(input("desired speed for testing: "))
+ft = 5 # front threshold
+lt = 20 # left threshold
+
 x = 1
 cpx = 35
 cpy = 20
 
-pos = "up"
+pos = "right"
 place = [ 
          [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
          [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -140,25 +141,27 @@ place = [
          [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.3]
         ]
 
-xMax = 0
-yMax = 0
+xMax = cpx
+yMax = cpy
 
-irmax = 70 # value we will decide
-magmax = 110 # value we will decide
+irmax = 60 # value we will decide
+magmax = 79 # value we will decide
 
-irobst_y = 40
-irobst_x = 40
-magobst_x = 10
-magobst_y = 10
+irobst_y = 0
+irobst_x = 0
+magobst_x = 0
+magobst_y = 0
 
 fid = open("team35_hazards.csv","w")
 
 fid.write("Team: 35\nHazard Type, Parameter of Interest, Parameter Value, Hazard X Coordinate (cm), Hazard Y Coordinate (cm)")
-fid.write("\nElectrical/Magnetic Activity Source, Field Strength (uT)," + str(magmax) + ", " + str(magobst_x * 3.75) + ", " + str(magobst_y * 3.75))
-fid.write("\nHigh Temperature Heat Source, Radiated Power (W)" + str(irmax) + ", " + str(irobst_x * 3.75) + ", " + str(irobst_y * 3.75))
 
-fid.close()
+
+# fid.write("\nHigh Temperature Heat Source, Radiated Power (W)" + str(irmax) + ", " + str(irobst_x * 3.75) + ", " + str(irobst_y * 3.75))
+
+
 # Logic =========================================================
+start = input("type to start:")
 
 try:
     while True:
@@ -168,40 +171,49 @@ try:
         irtwo = grovepi.analogRead(two)
         
         mag_x = mpu9250.readMagnet()['x']
+        #print(mag_x)
         irreal = 0.5 * (irone + irtwo)
+        print(irreal)
         #usr = grovepi.ultrasonicRead(right)
         print(f"f: {usf}, l: {usl}")
         if (usf < ft):
-            if (usl > 20):
+            if (usl > lt):
                 pos = turnLeft(pos)
             else:
                 pos = turnRight(pos)
         elif (irreal > irmax):
+            print("IR READ")
             if (pos == 'up'):
                 irobst_y = cpy + 2
                 irobst_x = cpx
                 
+                print(len(place))
                 place.append([])
-                for i in range(0, cpx, 1):
-                    place[cpy + 1].append(0)
-                    
+                for i in range(0, xMax + 1, 1):
+                    place[cpy + 1].append(1)
+                print(len(place))    
                 place.append([])
-                for i in range(0, cpx, 1):
-                    place[irobst_y].append(0)
-                                        
-                place[irobst_y][cpx] = 0.1                
+                for i in range(0, xMax + 1, 1):
+                    place[irobst_y].append(1)
+                print(len(place))
+                print(len(place[irobst_y]))
+                print(f'y: {irobst_y} x: {irobst_x}')  
+                                  
+                place[irobst_y][cpx] = 0.8
+                if (irobst_y > yMax):
+                    yMax = irobst_y              
                 
             elif (pos == 'left'):
                 irobst_x = cpx - 2
                 irobst_y = cpy
-                
-                place[irobst_y][irobst_x] = 0.1 
+
+                place[irobst_y][irobst_x] = 0.8 
                 
             elif (pos == 'right'):
                 irobst_x = cpx + 2
-                irobst_y = cpy
-                 
-                if ((irobst_x) < len(place[cpy])): 
+                irobst_y = cpy     
+
+                if ((irobst_x) > (len(place[cpy]))): 
                     place[cpy].append(1)
                     place[cpy].append(1)
                     for i in range(0, len(place), 1):
@@ -210,40 +222,58 @@ try:
                             place[i].append(1)
                 else:
                     place[cpy][cpx+1] = 1
-                place[cpy][irobst_x] = 0.1                    
+                place[cpy][irobst_x] = 0.8 
+                if (irobst_x > xMax):
+                    xMax = irobst_x        
+                                     
             
             elif (pos == 'down'):
                 irobst_x = cpx 
                 irobst_y = cpy - 2
                 
-                place[irobst_y][irobst_x] = 0.1                
-                
+                place[irobst_y][irobst_x] = 0.8                
+            fid = open("team35_hazards.csv","a")   
+            fid.write("\nHigh Temperature Heat Source, Radiated Power (W)" + str(irmax) + ", " + str(irobst_x * 3.75) + ", " + str(irobst_y * 3.75))
+            fid.close()
+            
+            if (usl > lt):
+                pos = turnLeft(pos)
+            else:
+                pos = turnRight(pos)       
+                                   
         elif (mag_x > magmax):
             if (pos == 'up'):
                 magobst_y = cpy + 2
                 magobst_x = cpx
- 
+                
+                print(len(place))
                 place.append([])
-                for i in range(0, cpx, 1):
-                    place[cpy + 1].append(0)
+                for i in range(0, xMax + 1, 1):
+                    place[cpy + 1].append(1)
+                print(len(place))    
+                place.append([])
+                for i in range(0, xMax + 1, 1):
+                    place[magobst_y].append(1)
+                #print(len(place))
+                #print(len(place[magobst_y]))
+                #print(f'y: {magobst_y} x: {magobst_x}')  
+                                  
+                place[magobst_y][cpx] = 0.7
+                if (magobst_y > yMax):
+                    yMax = magobst_y  
                     
-                place.append([])
-                for i in range(0, cpx, 1):
-                    place[magobst_y].append(0)
-                                        
-                place[magobst_y][cpx] = 0.2    
                                 
             elif (pos == 'left'):
                 magobst_x = cpx - 2
                 magobst_y = cpy
 
-                place[magobst_y][magobst_x] = 0.2 
+                place[magobst_y][magobst_x] = 0.7 
                 
             elif (pos == 'right'):
                 magobst_x = cpx + 2
                 magobst_y = cpy     
 
-                if ((magobst_x) < len(place[cpy])): 
+                if ((magobst_x) > (len(place[cpy]))): 
                     place[cpy].append(1)
                     place[cpy].append(1)
                     for i in range(0, len(place), 1):
@@ -252,15 +282,19 @@ try:
                             place[i].append(1)
                 else:
                     place[cpy][cpx+1] = 1
-                place[cpy][magobst_x] = 0.1              
+                place[cpy][magobst_x] = 0.7 
+                if (magobst_x > xMax):
+                    xMax = magobst_x        
                                 
             elif (pos == 'down'):
                 magobst_x = cpx 
                 magobst_y = cpy - 2
                 
-                place[magobst_y][magobst_x] = 0.1 
-                                                                             
-            if (usl > 40):
+                place[magobst_y][magobst_x] = 0.7 
+            fid = open("team35_hazards.csv","a")    
+            fid.write("\nElectrical/Magnetic Activity Source, Field Strength (uT)," + str(magmax) + ", " + str(magobst_x * 3.75) + ", " + str(magobst_y * 3.75))
+            fid.close()                                                                 
+            if (usl > lt):
                 pos = turnLeft(pos)
             else:
                 pos = turnRight(pos)  
@@ -270,12 +304,30 @@ try:
             if (pos == 'up'):
                 cpy += 1
                 place.append([])
-                for i in range(0, cpx, 1):
+                if (cpx == xMax):
+                    
+                    for i in range(0, cpx, 1):
+                        place[cpy].append(1)
+                    place[cpy].append(0)
+                else:
+                    print(f"xmax: {xMax}; ymax: {yMax}")
+                    print("I am here")
+                    for i in range(0, xMax, 1):
+                        place[cpy].append(1)
+                        #print("I HAVE ARRIVED")
+
+                    for i in range(0, len(place), 1):
+                        print(f"length of {len(place[i])}")
+                        if (len(place[i]) == 0):
+                            for f in range(0, xMax + 1, 1):
+                                place[i].append(1)    
+                    place[cpy][cpx]= 0
                     place[cpy].append(1)
-                place[cpy].append(0)    
+                                      
+                
             elif (pos == 'right'):
                 cpx += 1
-                if ((cpx) < len(place[cpy])): 
+                if ((cpx + 1) > len(place[cpy])): 
                     place[cpy].append(0)
                     for i in range(0, len(place), 1):
                         if (i != cpy):
@@ -308,6 +360,7 @@ except KeyboardInterrupt:
     #print(len(place))
     print(cpy - 20)
     place[cpy][cpx] = 0.5
+    
     time.sleep(0.5)
     dropCargo()
     print(place)
