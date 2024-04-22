@@ -14,9 +14,9 @@ import time     # import the time library for the sleep function
 import brickpi3 # import the BrickPi3 drivers
 import grovepi
 
-
+print("beep boop. initializing!")
 BP = brickpi3.BrickPi3() 
-BP.set_sensor_type(BP.PORT_3, BP.SENSOR_TYPE.EV3_GYRO_ABS_DPS) # gyro sensor
+BP.set_sensor_type(BP.PORT_1, BP.SENSOR_TYPE.EV3_GYRO_ABS_DPS) # gyro sensor
 RIGHT = BP.PORT_A
 LEFT = BP.PORT_D
 BACK = BP.PORT_B
@@ -36,18 +36,21 @@ def turnRight(pos):
     print("I turn left")
     print("I turn right")
     y = 0 # has not turned yet
-    first = BP.get_sensor(BP.PORT_3) # initial position
-    while y != 1:
-        sensorValues = BP.get_sensor(BP.PORT_3)
-        if (sensorValues[0]) < (84+(first[0])):
-            BP.set_motor_power(RIGHT, 20)
-            BP.set_motor_power(LEFT, -20)  
-        else:
-            BP.set_motor_power(RIGHT, 0) 
-            BP.set_motor_power(LEFT, 0) 
-            y = 1
-            time.sleep(0.025)
-    time.sleep(0.2)
+    try:
+        first = BP.get_sensor(BP.PORT_1) # initial position
+        while y != 1:
+            sensorValues = BP.get_sensor(BP.PORT_1)
+            if (sensorValues[0]) < (84+(first[0])):
+                BP.set_motor_power(RIGHT, 20)
+                BP.set_motor_power(LEFT, -20)  
+            else:
+                BP.set_motor_power(RIGHT, 0) 
+                BP.set_motor_power(LEFT, 0) 
+                y = 1
+                time.sleep(0.025)
+        time.sleep(0.2)
+    except brickpi3.SensorError as error:
+        print(error)
     return pos
             
 def turnLeft(pos):
@@ -61,18 +64,21 @@ def turnLeft(pos):
         pos = 'up'
     print("I turn left")
     y = 0 # has not turned yet
-    first = BP.get_sensor(BP.PORT_3) # initial position
-    while y != 1:
-        sensorValues = BP.get_sensor(BP.PORT_3)
-        if (sensorValues[0]) > (first[0]-84):
-            BP.set_motor_power(RIGHT, -20)
-            BP.set_motor_power(LEFT, 20)  
-        else:
-            BP.set_motor_power(RIGHT, 0) 
-            BP.set_motor_power(LEFT, 0) 
-            y = 1
-            time.sleep(0.025)
-    time.sleep(0.2)
+    try:
+        first = BP.get_sensor(BP.PORT_1) # initial position
+        while y != 1:
+            sensorValues = BP.get_sensor(BP.PORT_1)
+            if (sensorValues[0]) > (first[0]-84):
+                BP.set_motor_power(RIGHT, -20)
+                BP.set_motor_power(LEFT, 20)  
+            else:
+                BP.set_motor_power(RIGHT, 0) 
+                BP.set_motor_power(LEFT, 0) 
+                y = 1
+                time.sleep(0.025)
+        time.sleep(0.2)
+    except brickpi3.SensorError as error:
+        print(error)    
     return(pos)
 
 def goForward():
@@ -144,8 +150,8 @@ place = [
 xMax = cpx
 yMax = cpy
 
-irmax = 60 # value we will decide
-magmax = 79 # value we will decide
+irmax = 72 # value we will decide
+magmax = 100 # value we will decide
 
 irobst_y = 0
 irobst_x = 0
@@ -161,7 +167,7 @@ fid.write("Team: 35\nHazard Type, Parameter of Interest, Parameter Value, Hazard
 
 
 # Logic =========================================================
-start = input("type to start:")
+start = input("PRESS ENTER TO START!")
 
 try:
     while True:
@@ -305,24 +311,23 @@ try:
                 cpy += 1
                 place.append([])
                 if (cpx == xMax):
-                    
                     for i in range(0, cpx, 1):
                         place[cpy].append(1)
                     place[cpy].append(0)
                 else:
                     print(f"xmax: {xMax}; ymax: {yMax}")
                     print("I am here")
-                    for i in range(0, xMax, 1):
-                        place[cpy].append(1)
+                    #for i in range(0, xMax, 1):
+                        #place[cpy].append(1)
                         #print("I HAVE ARRIVED")
 
                     for i in range(0, len(place), 1):
-                        print(f"length of {len(place[i])}")
                         if (len(place[i]) == 0):
                             for f in range(0, xMax + 1, 1):
-                                place[i].append(1)    
+                                place[i].append(1)
+                        print(f"length of {len(place[i])}")            
                     place[cpy][cpx]= 0
-                    place[cpy].append(1)
+                    #place[cpy].append(1)
                                       
                 
             elif (pos == 'right'):
@@ -350,6 +355,8 @@ try:
     
       
 except KeyboardInterrupt:
+    if (place[-1] == []):
+        place.pop()
     BP.set_motor_power(RIGHT, 0)
     BP.set_motor_power(LEFT, 0)
 

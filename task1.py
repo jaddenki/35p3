@@ -8,7 +8,7 @@ import time     # import the time library for the sleep function
 import brickpi3 # import the BrickPi3 drivers
 
 BP = brickpi3.BrickPi3() # Create an instance of the BrickPi3 class. BP will be the BrickPi3 object.
-BP.set_sensor_type(BP.PORT_3, BP.SENSOR_TYPE.EV3_GYRO_ABS_DPS)
+BP.set_sensor_type(BP.PORT_1, BP.SENSOR_TYPE.EV3_GYRO_ABS_DPS)
 
 RIGHT = BP.PORT_A
 LEFT = BP.PORT_D
@@ -19,9 +19,9 @@ BACK = BP.PORT_B
 def turnRight(turnAmt):
     print("I turn right")
     y = 0 # has not turned yet
-    first = BP.get_sensor(BP.PORT_3) # initial position
+    first = BP.get_sensor(BP.PORT_1) # initial position
     while y != 1:
-        sensorValues = BP.get_sensor(BP.PORT_3)
+        sensorValues = BP.get_sensor(BP.PORT_1)
         if (sensorValues[0]) < (turnAmt+(first[0])):
             BP.set_motor_power(RIGHT, 20)
             BP.set_motor_power(LEFT, -20)  
@@ -34,9 +34,9 @@ def turnRight(turnAmt):
 def turnLeft(turnAmt):
     print("I turn left")
     y = 0 # has not turned yet
-    first = BP.get_sensor(BP.PORT_3) # initial position
+    first = BP.get_sensor(BP.PORT_1) # initial position
     while y != 1:
-        sensorValues = BP.get_sensor(BP.PORT_3)
+        sensorValues = BP.get_sensor(BP.PORT_1)
         if (sensorValues[0]) > (first[0]-turnAmt):
             BP.set_motor_power(RIGHT, -20)
             BP.set_motor_power(LEFT, 20)  
@@ -65,20 +65,23 @@ def dropCargo(num):
 # Logic =========================================
 
 try:
-    while True:
-        option = input("t or c: ")
-        if option == "t":
-            turnAmt = int(input("Amt to turn: "))
-            direction = input("r or l or : ")
-            if direction == 'r':
-                turnRight(turnAmt)
-            elif direction == 'l':
-                turnLeft(turnAmt)
-        elif option == "c":
-            num = int(input("cargo speed test number: "))
-            dropCargo(num)
-        #amt = float(input("time to test: "))
-        #goForward(amt)
+    try:
+        while True:
+            option = input("t or c: ")
+            if option == "t":
+                turnAmt = int(input("Amt to turn: "))
+                direction = input("r or l or : ")
+                if direction == 'r':
+                    turnRight(turnAmt)
+                elif direction == 'l':
+                    turnLeft(turnAmt)
+            elif option == "c":
+                num = int(input("cargo speed test number: "))
+                dropCargo(num)
+            #amt = float(input("time to test: "))
+            #goForward(amt)
+    except brickpi3.SensorError as error:
+        print(error)     
 except KeyboardInterrupt: # except the program gets interrupted by Ctrl+C on the keyboard.
     BP.reset_all()        # Unconfigure the sensors, disable the motors, and restore the LED to the control of the BrickPi3 firmware.
     sys.exit()
